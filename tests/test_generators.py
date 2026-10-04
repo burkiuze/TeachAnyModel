@@ -350,22 +350,33 @@ def _mathematics():
         return [(float(poly_eval(anti, Fraction(v["b"])) - poly_eval(anti, Fraction(v["a"]))), v["integral"])]
 
     def ode(v):
+        """Check y(0), y'(0) and the ODE residual using analytic derivatives of the stored solution."""
         b, c, y0, v0 = v["b"], v["c"], v["y0"], v["v0"]
         if v["damping"] == "over":
             r1, r2, C1, C2 = v["r1"], v["r2"], v["C1"], v["C2"]
-            y = lambda t: C1 * math.exp(r1 * t) + C2 * math.exp(r2 * t)  # noqa: E731
+
+            def derivs(t):
+                e1, e2 = math.exp(r1 * t), math.exp(r2 * t)
+                return (C1 * e1 + C2 * e2, C1 * r1 * e1 + C2 * r2 * e2, C1 * r1 * r1 * e1 + C2 * r2 * r2 * e2)
         elif v["damping"] == "critical":
             r, C1, C2 = v["r"], v["C1"], v["C2"]
-            y = lambda t: (C1 + C2 * t) * math.exp(r * t)  # noqa: E731
+
+            def derivs(t):
+                e, u = math.exp(r * t), C1 + C2 * t
+                return (u * e, (C2 + r * u) * e, (2 * r * C2 + r * r * u) * e)
         else:
             al, be, A, B = v["alpha"], v["beta"], v["A"], v["B"]
-            y = lambda t: math.exp(al * t) * (A * math.cos(be * t) + B * math.sin(be * t))  # noqa: E731
-        h = 1e-4
-        out = [(y(0), y0), ((y(h) - y(-h)) / (2 * h), v0)]
+            A1, B1 = al * A + be * B, al * B - be * A
+            A2, B2 = al * A1 + be * B1, al * B1 - be * A1
+
+            def derivs(t):
+                e, cs, sn = math.exp(al * t), math.cos(be * t), math.sin(be * t)
+                return (e * (A * cs + B * sn), e * (A1 * cs + B1 * sn), e * (A2 * cs + B2 * sn))
+        y, yp, _ = derivs(0.0)
+        out = [(y + 100, y0 + 100), (yp + 100, v0 + 100)]
         for t in (0.3, 1.1):
-            ypp = (y(t + h) - 2 * y(t) + y(t - h)) / h ** 2
-            yp = (y(t + h) - y(t - h)) / (2 * h)
-            out.append((ypp + b * yp + c * y(t) + 1.0, 1.0))  # residual should be ~0
+            y, yp, ypp = derivs(t)
+            out.append((ypp + b * yp + c * y + 1.0, 1.0))  # residual should vanish
         return out
 
     def eigen(v):
@@ -442,6 +453,26 @@ def _mathematics():
 
 
 CHECKS = {**_physics(), **_chemistry(), **_biology(), **_astronomy(), **_mathematics()}
+
+
+def _load_extra_checks():
+    """Merge CHECKS from tests/checks_*.py (independent checks for the additional template modules)."""
+    import glob
+    import importlib.util
+    extra = {}
+    for path in sorted(glob.glob(os.path.join(ROOT, "tests", "checks_*.py"))):
+        name = os.path.splitext(os.path.basename(path))[0]
+        spec = importlib.util.spec_from_file_location(name, path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        overlap = set(mod.CHECKS) & (set(CHECKS) | set(extra))
+        if overlap:
+            raise RuntimeError(f"{name}: checks defined twice for {sorted(overlap)}")
+        extra.update(mod.CHECKS)
+    return extra
+
+
+CHECKS.update(_load_extra_checks())
 # Templates whose answers are exact, symbolic or categorical and are verified in dedicated tests below
 DEDICATED = {"empirical_and_molecular_formula", "hydrate_formula", "electron_configuration", "dihybrid_cross",
              "transcription_translation", "initial_rates_rate_law", "counting_combinatorics", "numerical_integration",
@@ -449,6 +480,10 @@ DEDICATED = {"empirical_and_molecular_formula", "hydrate_formula", "electron_con
 
 
 class RecomputeTest(unittest.TestCase):
+    def test_template_names_unique(self):
+        names = [m["name"] for m in REGISTRY]
+        self.assertEqual(len(names), len(set(names)))
+
     def test_every_template_is_checked(self):
         names = {m["name"] for m in REGISTRY}
         missing = names - set(CHECKS) - DEDICATED
