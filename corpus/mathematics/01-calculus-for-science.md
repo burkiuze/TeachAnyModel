@@ -22,7 +22,7 @@ The **limit** $\lim_{x\to a}f(x) = L$ means $f(x)$ can be made arbitrarily close
 **Important limits:**
 $$\lim_{x\to0}\frac{\sin x}{x} = 1, \qquad \lim_{x\to0}\frac{e^x - 1}{x} = 1, \qquad \lim_{n\to\infty}\left(1 + \frac1n\right)^n = e \approx 2.71828, \qquad \lim_{x\to\infty}\frac1x = 0$$
 
-The number $e$ arises naturally from continuous compounding: $1 invested at 100% annual interest compounded continuously grows to $e \approx \$2.718$ after one year.
+The number $e$ arises naturally from continuous compounding: one dollar invested at 100% annual interest, compounded continuously, grows to $e \approx 2.718$ dollars after one year.
 
 **Continuity:** $f$ is continuous at $a$ if $\lim_{x\to a}f(x) = f(a)$. Polynomials, exponentials, sine and cosine are continuous everywhere. The **intermediate value theorem** guarantees that a continuous function taking values $f(a)$ and $f(b)$ takes every value in between (useful for proving roots exist).
 

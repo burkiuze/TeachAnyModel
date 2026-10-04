@@ -173,7 +173,7 @@ where $L$ is a characteristic length (pipe diameter) and $\nu = \eta/\rho$ is th
 
 Turbulence is one of the great unsolved problems of classical physics. The governing equations are the **Navier–Stokes equations**:
 $$\rho\left(\frac{\partial\vec v}{\partial t} + (\vec v\cdot\nabla)\vec v\right) = -\nabla P + \eta\nabla^2\vec v + \rho\vec g$$
-Proving whether smooth solutions always exist in 3D is one of the seven Clay Mathematics Institute Millennium Prize Problems ($1 million prize).
+Proving whether smooth solutions always exist in 3D is one of the seven Clay Mathematics Institute Millennium Prize Problems (with a prize of one million US dollars).
 
 ### Drag at high Reynolds number
 $F_d = \frac12 C_d\rho Av^2$, where $C_d$ depends on shape ($\approx 0.47$ for a sphere, $\approx 0.04$ for a streamlined airfoil, $\approx 1.0$–$1.3$ for a person or a flat plate facing the flow). Golf ball dimples trigger a turbulent boundary layer that stays attached longer, shrinking the wake and roughly halving drag at typical driving speeds.
