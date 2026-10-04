@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Exported training files (rebuild with: python scripts/build_datasets.py)
+dist/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
