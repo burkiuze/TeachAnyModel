@@ -490,7 +490,10 @@ class RecomputeTest(unittest.TestCase):
         self.assertFalse(missing, f"templates without an independent check: {sorted(missing)}")
 
     def test_recomputed_values_match(self):
+        registered = {m["name"] for m in REGISTRY}
         for name, fn in CHECKS.items():
+            if name not in registered:  # checks for a module that is not enabled in problem_generators/__init__.py
+                continue
             for rec in records(name):
                 for computed, stored in fn(rec["values"]):
                     with self.subTest(template=name, id=rec["id"]):
